@@ -25,11 +25,13 @@ class Card
     end
 end
 
-card = Card.new('Sol Ring', '(1)', 'Artifact', '', 'Uncommon', '(T): Add (C)(C).', '"All creation in a single point, the point of all creation in all." -Sunstar loop-mantra', '')
+if __FILE__ == $0
+    card = Card.new('Sol Ring', '(1)', 'Artifact', '', 'Uncommon', '(T): Add (C)(C).', '"All creation in a single point, the point of all creation in all." -Sunstar loop-mantra', '')
 
-card.displayCard
+    card.displayCard
 
-test = Magick::ImageList.new("Images/Sol_Ring.webp")
-tempFile = "Images/tempfile.webp"
-test.write(tempFile)
-system("start #{tempFile}")
+    test = Magick::ImageList.new("Images/Sol_Ring.webp")
+    tempFile = "Images/tempfile.webp"
+    test.write(tempFile)
+    system("start #{tempFile}")
+end
