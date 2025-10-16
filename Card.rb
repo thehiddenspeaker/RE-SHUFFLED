@@ -1,7 +1,9 @@
 require "rmagick"
 
 class Card
-    def initialize(name = '', manaCost = '', type = '', subType = '', rarity = '', rules = '', flavor = '', stats = '', art = '')
+        attr_accessor :name, :manaCost, :type, :subType, :rarity, :rules, :flavor, :stats, :art, :power, :toughness
+
+    def initialize(name = '', manaCost = '', type = '', subType = '', rarity = '', rules = '', flavor = '', stats = '', art = '',power='',toughness='')
         @name = name                     # String, ex: 'Krark, the Thumbless'
         @manaCost = manaCost             # String of mana values, ex: '(1)(R)' for 1 generic mana and one red mana
         @type = type                     # String, most typically one of the following: 'Creature', 'Sorcery', 'Instant', 'Enchantment', 'Artifact'
