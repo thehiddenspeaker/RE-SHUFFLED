@@ -19,22 +19,27 @@ rules = gets
 puts "Enter flavor"
 flavor = gets
 puts "Enter power/toughness"
-power = gets.chomp
+stats = gets
+puts "Enter art filepath"
+artFilepath = gets.chomp
 
 
 
-stats = Card.new(name, manacost, type, subType, rarity, rules, flavor, power, "")
+stats = Card.new(name, manacost, type, subType, rarity, rules, flavor, stats, artFilepath)
 stats.displayCard
 
 
-if (!stats.stats.empty?)
+if (!stats.stats.chomp.empty?)
 TEMPLATE_PATH = "Images/Templates/mtg_colorless_frame_creature.png"
+else
+TEMPLATE_PATH = "Images/Templates/mtg_colorless_frame.png"
 end
 
 card = Image.read(TEMPLATE_PATH).first
 
 draw = Draw.new
 draw.fill = "black"
+draw.font = "Beleren2016-Bold"
 
 def wrap_text(text, max_chars)
   text.split("\n").flat_map do |line|
@@ -45,25 +50,30 @@ end
 
 # ---- Name bar ----
 draw.pointsize = 52
-draw.annotate(card, 0, 0, 90, 70, stats.name) do |ann|
+draw.annotate(card, 0, 0, 90, 80, stats.name) do |ann|
   ann.gravity = NorthWestGravity
 end
 
 draw.pointsize = 52
-draw.annotate(card, 0, 0, 850, 70, stats.manaCost) do |ann|
+draw.annotate(card, 0, 0, 850, 80, stats.manaCost) do |ann|
   ann.gravity = NorthWestGravity
 end
 
 # ---- Type line ----
 draw.pointsize = 48
-draw.annotate(card, 0, 0, 90, 800, stats.type) do |ann|
+if (!stats.subType.chomp.empty?)
+  typeString = stats.type.chomp + ' — ' + stats.subType
+else
+  typeString = stats.type
+end
+draw.annotate(card, 0, 0, 90, 810, typeString) do |ann|
   ann.gravity = NorthWestGravity
 end
 
 # ---- Description box ----
 draw.pointsize = 46
 wrapped_desc = wrap_text(stats.rules, 40)
-draw.annotate(card, 0, 0, 95, 880, wrapped_desc) do |ann|
+draw.annotate(card, 0, 0, 95, 900, wrapped_desc) do |ann|
   ann.gravity = NorthWestGravity
 end
 
@@ -80,5 +90,13 @@ if(!stats.stats.empty?)
     end
 end
 
+artImage = Image.read(artFilepath).first
+finalCard = Image.read(TEMPLATE_PATH).first
+artImage.change_geometry!('1005x1407') { |cols, rows, img|
+    img.resize!(cols, rows)
+}
 
-card.write("output_card.png")
+finalCard.composite!(artImage, 0, 100, Magick::SrcOverCompositeOp)
+finalCard.composite!(card, 0, 0, Magick::SrcOverCompositeOp)
+
+finalCard.write("output_card.png")
