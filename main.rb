@@ -9,7 +9,7 @@ name = gets
 
 if name.include? "test"
   name = 'Sol Ring'
-  manacost = '(1)'
+  manacost = '(1)\n'
   type = 'Artifact'
   rules = '(T): Add (C)(C).'
   flavor = "Lost to time is the artificer’s art of trapping light from a distant star in a ring of purest gold."
@@ -67,8 +67,8 @@ draw.annotate(card, 0, 0, 90, 80, stats.name) do |ann|
 end
 
 draw.pointsize = 52
-draw.annotate(card, 0, 0, 850, 80, stats.manaCost) do |ann|
-  ann.gravity = NorthWestGravity
+draw.annotate(card, 1000, 100, 90, 80, stats.manaCost) do |ann|
+  ann.gravity = EastGravity
 end
 
 # ---- Type line ----
@@ -85,7 +85,7 @@ end
 # ---- Stats box ----
 if(!stats.stats.empty?)
     draw.pointsize = 46
-    draw.annotate(card, 0, 0, 830, 1260, "#{stats.stats}") do |ann|
+    draw.annotate(card, 0, 0, 830, 1270, "#{stats.stats}") do |ann|
     ann.gravity = NorthWestGravity
     end
 end
