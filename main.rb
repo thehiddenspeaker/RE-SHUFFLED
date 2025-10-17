@@ -82,6 +82,14 @@ draw.annotate(card, 0, 0, 90, 810, typeString) do |ann|
   ann.gravity = NorthWestGravity
 end
 
+# ---- Stats box ----
+if(!stats.stats.empty?)
+    draw.pointsize = 46
+    draw.annotate(card, 0, 0, 830, 1260, "#{stats.stats}") do |ann|
+    ann.gravity = NorthWestGravity
+    end
+end
+
 # ---- Description box ----
 draw.pointsize = 46
 draw.font = "MPlantin"
@@ -97,12 +105,6 @@ draw.annotate(card, 0, 0, 95, 1090, wrapped_desc) do |ann|
   ann.gravity = NorthWestGravity
 end
 
-if(!stats.stats.empty?)
-    draw.pointsize = 46
-    draw.annotate(card, 0, 0, 830, 1260, "#{stats.stats}") do |ann|
-    ann.gravity = NorthWestGravity
-    end
-end
 
 artImage = Image.read(artFilepath).first
 finalCard = Image.read(TEMPLATE_PATH).first
