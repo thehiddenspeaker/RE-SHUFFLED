@@ -107,12 +107,13 @@ end
 
 
 artImage = Image.read(artFilepath).first
-finalCard = Image.read(TEMPLATE_PATH).first
-artImage.change_geometry!('1005x1407') { |cols, rows, img|
+artImage.change_geometry!('850x621!') { |cols, rows, img|
     img.resize!(cols, rows)
 }
+temp = Image.new(1005,1407) do |img|
+  img.background_color = 'none'
+end
+temp.composite!(artImage, 77, 159, SrcOverCompositeOp)
+card = temp.composite(card, 0, 0, SrcOverCompositeOp)
 
-finalCard.composite!(artImage, 0, 100, Magick::SrcOverCompositeOp)
-finalCard.composite!(card, 0, 0, Magick::SrcOverCompositeOp)
-
-finalCard.write("output_card.png")
+card.write("output_card.png")
