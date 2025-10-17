@@ -6,23 +6,35 @@ require_relative "Card"
 TEMPLATE_PATH = "Images/Templates/mtg_colorless_frame.png"
 puts "Enter Name"
 name = gets
-puts "Enter mana cost"
-manacost = gets
-puts "Enter type"
-type = gets
-puts "Enter subtype"
-subType = gets
-puts "Enter rarity"
-rarity = gets
-puts "Enter rules"
-rules = gets
-puts "Enter flavor"
-flavor = gets
-puts "Enter power/toughness"
-stats = gets
-puts "Enter art filepath"
-artFilepath = gets.chomp
 
+if name.include? "test"
+  name = 'Sol Ring'
+  manacost = '(1)'
+  type = 'Artifact'
+  rules = '(T): Add (C)(C).'
+  flavor = "Lost to time is the artificer’s art of trapping light from a distant star in a ring of purest gold."
+  artFilepath = "Images/Sol_Ring.webp"
+  stats = ''
+  subType = ''
+  rarity = ''
+else
+  puts "Enter mana cost"
+  manacost = gets
+  puts "Enter type"
+  type = gets
+  puts "Enter subtype"
+  subType = gets
+  puts "Enter rarity"
+  rarity = gets
+  puts "Enter rules"
+  rules = gets
+  puts "Enter flavor"
+  flavor = gets
+  puts "Enter power/toughness"
+  stats = gets
+  puts "Enter art filepath"
+  artFilepath = gets.chomp
+end
 
 
 stats = Card.new(name, manacost, type, subType, rarity, rules, flavor, stats, artFilepath)
@@ -72,12 +84,14 @@ end
 
 # ---- Description box ----
 draw.pointsize = 46
+draw.font = "MPlantin"
 wrapped_desc = wrap_text(stats.rules, 40)
 draw.annotate(card, 0, 0, 95, 900, wrapped_desc) do |ann|
   ann.gravity = NorthWestGravity
 end
 
 draw.pointsize = 46
+draw.font = "MPlantin-Italic"
 wrapped_desc = wrap_text(stats.flavor, 40)
 draw.annotate(card, 0, 0, 95, 1090, wrapped_desc) do |ann|
   ann.gravity = NorthWestGravity
