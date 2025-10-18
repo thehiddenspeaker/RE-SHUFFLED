@@ -4,7 +4,8 @@ require_relative "Card"
 
 
 TEMPLATE_PATH = "Images/Templates/mtg_colorless_frame.png"
-puts "Enter Name"
+puts "Welcome to Re-Shuffled\n A project that creates a trading card automatically or based on user inputs\n Include your card details: "
+puts "Enter card name:"
 name = gets
 
 if name.include? "test"
@@ -51,7 +52,7 @@ card = Image.read(TEMPLATE_PATH).first
 
 draw = Draw.new
 draw.fill = "black"
-draw.font = "Beleren2016-Bold"
+draw.font = "Fonts/Beleren2016-Bold.ttf"
 
 def wrap_text(text, max_chars)
   text.split("\n").flat_map do |line|
@@ -92,14 +93,14 @@ end
 
 # ---- Description box ----
 draw.pointsize = 46
-draw.font = "MPlantin"
+draw.font = "Fonts/MPlantin-Regular.ttf"
 wrapped_desc = wrap_text(stats.rules, 40)
 draw.annotate(card, 0, 0, 95, 900, wrapped_desc) do |ann|
   ann.gravity = NorthWestGravity
 end
 
 draw.pointsize = 46
-draw.font = "MPlantin-Italic"
+draw.font = "Fonts/MPlantin-Italic-Regular.ttf"
 wrapped_desc = wrap_text(stats.flavor, 40)
 draw.annotate(card, 0, 0, 95, 1090, wrapped_desc) do |ann|
   ann.gravity = NorthWestGravity
