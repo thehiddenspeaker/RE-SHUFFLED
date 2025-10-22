@@ -85,7 +85,7 @@ end
 
 # ---- Stats box ----
 if(!stats.stats.empty?)
-    draw.pointsize = 46
+    draw.pointsize = 52
     draw.annotate(card, 0, 0, 830, 1270, "#{stats.stats}") do |ann|
     ann.gravity = NorthWestGravity
     end
