@@ -8,35 +8,22 @@ puts "Welcome to Re-Shuffled\n A project that creates a trading card automatical
 puts "Enter card name:"
 name = gets
 
-if name.include? "test"
-  name = 'Sol Ring'
-  manacost = '(1)\n'
-  type = 'Artifact'
-  rules = '(T): Add (C)(C).'
-  flavor = "Lost to time is the artificer’s art of trapping light from a distant star in a ring of purest gold."
-  artFilepath = "Images/Sol_Ring.webp"
-  stats = ''
-  subType = ''
-  rarity = ''
-else
-  puts "Enter mana cost"
-  manacost = gets
-  puts "Enter type"
-  type = gets
-  puts "Enter subtype"
-  subType = gets
-  puts "Enter rarity"
-  rarity = gets
-  puts "Enter rules"
-  rules = gets
-  puts "Enter flavor"
-  flavor = gets
-  puts "Enter power/toughness"
-  stats = gets
-  puts "Enter art filepath"
-  artFilepath = gets.chomp
-end
-
+puts "Enter mana cost:"
+manacost = gets
+puts "Enter type:"
+type = gets
+puts "Enter subtype:"
+subType = gets
+puts "Enter rarity:"
+rarity = gets
+puts "Enter rules:"
+rules = gets
+puts "Enter flavor:"
+flavor = gets
+puts "Enter power/toughness:"
+stats = gets
+puts "Enter art filepath:"
+artFilepath = gets.chomp
 
 stats = Card.new(name, manacost, type, subType, rarity, rules, flavor, stats, artFilepath)
 stats.displayCard
@@ -86,8 +73,8 @@ end
 # ---- Stats box ----
 if(!stats.stats.empty?)
     draw.pointsize = 52
-    draw.annotate(card, 0, 0, 830, 1270, "#{stats.stats}") do |ann|
-    ann.gravity = NorthWestGravity
+    draw.annotate(card, 40, 20, 845, 1310, "#{stats.stats}") do |ann|
+    ann.gravity = CenterGravity
     end
 end
 
