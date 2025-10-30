@@ -10,6 +10,10 @@ configure do
   set :public_folder, "public"
 end
 
+before do
+  response.headers['Access-Control-Allow-Origin'] = '*'
+end
+
 options "*" do
   200
 end
