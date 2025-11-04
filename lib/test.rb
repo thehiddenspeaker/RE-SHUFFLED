@@ -44,21 +44,22 @@ def addManaText(text, draw, frame, x, y)
     newX = 0
     newY = 0
     splitText = text.split(/(\(.\))/).reject!(&:empty?)
-    puts splitText.inspect
 
     splitText.each do |item|
         if (item.match(/(\(.\))/)) then
-            iconFile = $icons[item.upcase]
-            icon = Image.read(iconFile) { |img|
+            iconFile = $icons.fetch(item.upcase) { nil }
+            if !iconFile.nil? then
+                icon = Image.read(iconFile) { |img|
                 img.format = 'SVG'
                 img.background_color = 'transparent' }.first
-            icon.change_geometry!('38x38!') { |cols, rows, icon_img| icon_img.resize!(cols, rows) }
-            if (newX > MAX_WIDTH) then
-                newY += 55
-                newX = 0
+                icon.change_geometry!('38x38!') { |cols, rows, icon_img| icon_img.resize!(cols, rows) }
+                if (newX > MAX_WIDTH) then
+                    newY += 55
+                    newX = 0
+                end
+                frame.composite!(icon, x + newX, y + newY + 2, OverCompositeOp)
+                newX += 42
             end
-            frame.composite!(icon, x + newX, y + newY + 2, OverCompositeOp)
-            newX += 42
         else
             item.split("\n").each do |line|
                 line.split.each do |word|
