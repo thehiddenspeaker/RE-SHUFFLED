@@ -5,7 +5,8 @@ MAX_WIDTH = 800
 
 testFrame = Image.read("Images/Templates/mtg_colorless_frame.png")[0]
 
-inputText = "(T): Add (R). When that mana is spent to cast a red instant or sorcery spell, copy that spell and you may choose new targets for the copy."
+inputText = "Vigilance, trample, haste
+(W)(U)(B)(R)(G): You may play target Elemental card from your graveyard without paying its mana cost."
 
 $icons = {
     "(0)" => "Images/Templates/Icons/0.svg",
@@ -43,6 +44,7 @@ def addManaText(text, draw, frame, x, y)
     newX = 0
     newY = 0
     splitText = text.split(/(\(.\))/).reject!(&:empty?)
+    puts splitText.inspect
 
     splitText.each do |item|
         if (item.match(/(\(.\))/)) then
@@ -56,19 +58,23 @@ def addManaText(text, draw, frame, x, y)
                 newX = 0
             end
             frame.composite!(icon, x + newX, y + newY + 2, OverCompositeOp)
-            newX += 38
+            newX += 42
         else
-            item.split.each do |word|
-                width = draw.get_type_metrics(frame, word + " ").width
-                if (newX + width < MAX_WIDTH) then
-                    draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
-                    newX += width
-                else
-                    newY += 55
-                    newX = 0
-                    draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
-                    newX += width
+            item.split("\n").each do |line|
+                line.split.each do |word|
+                    width = draw.get_type_metrics(frame, word + " ").width
+                    if (newX + width < MAX_WIDTH) then
+                        draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
+                        newX += width
+                    else
+                        newY += 55
+                        newX = 0
+                        draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
+                        newX += width
+                    end
                 end
+                newY += 65
+                newX = 0
             end
         end
     end
