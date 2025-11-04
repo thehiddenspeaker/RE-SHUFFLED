@@ -5,8 +5,9 @@ MAX_WIDTH = 800
 
 testFrame = Image.read("Images/Templates/mtg_colorless_frame.png")[0]
 
-inputText = "Vigilance, trample, haste
-(W)(U)(B)(R)(G): You may play target Elemental card from your graveyard without paying its mana cost."
+inputText = "At the beginning of combat on your turn, exile up to one target card from a graveyard.
+(1)(B): Adapt 2.
+Whenever one or more +1/+1 counters are put on this creature, put a creature card exiled with this creature onto the battlefield under your control with a finality counter on it. It gains haste. Sacrifice it at the beginning of the next end step."
 
 $icons = {
     "(0)" => "Images/Templates/Icons/0.svg",
@@ -40,6 +41,8 @@ $icons = {
     "(X)" => "Images/Templates/Icons/X.svg"
 }
 
+$pointsize = 36
+
 def addManaText(text, draw, frame, x, y)
     newX = 0
     newY = 0
@@ -50,15 +53,16 @@ def addManaText(text, draw, frame, x, y)
             iconFile = $icons.fetch(item.upcase) { nil }
             if !iconFile.nil? then
                 icon = Image.read(iconFile) { |img|
-                img.format = 'SVG'
-                img.background_color = 'transparent' }.first
-                icon.change_geometry!('38x38!') { |cols, rows, icon_img| icon_img.resize!(cols, rows) }
+                    img.format = 'SVG'
+                    img.background_color = 'transparent' }.first
+                iconDim = $pointsize * 38/46
+                icon.change_geometry!("#{iconDim}x#{iconDim}!") { |cols, rows, icon_img| icon_img.resize!(cols, rows) }
                 if (newX > MAX_WIDTH) then
-                    newY += 55
+                    newY += $pointsize * 55/46
                     newX = 0
                 end
                 frame.composite!(icon, x + newX, y + newY + 2, OverCompositeOp)
-                newX += 42
+                newX += $pointsize * 42/46
             end
         else
             item.split("\n").each do |line|
@@ -68,13 +72,13 @@ def addManaText(text, draw, frame, x, y)
                         draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
                         newX += width
                     else
-                        newY += 55
+                        newY += $pointsize * 55/46
                         newX = 0
                         draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
                         newX += width
                     end
                 end
-                newY += 65
+                newY += $pointsize * 65/46
                 newX = 0
             end
         end
@@ -85,9 +89,9 @@ end
 
 draw = Draw.new
 draw.fill = "black"
-draw.pointsize = 46
+draw.pointsize = $pointsize
 draw.font = "Fonts/MPlantin-Regular.ttf"
 
-newImage = addManaText(inputText, draw, testFrame, 95, 900)
+newImage = addManaText(inputText, draw, testFrame, 90, 900)
 
 newImage.write("testImage.png")
