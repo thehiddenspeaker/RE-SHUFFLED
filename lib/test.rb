@@ -1,49 +1,78 @@
 require "rmagick"
 include Magick
 
-MAX_WIDTH = 700
+MAX_WIDTH = 800
 
 testFrame = Image.read("Images/Templates/mtg_colorless_frame.png")[0]
 
-inputText = "(X)(U) This is some hella text. Add (R) or something."
+inputText = "(T): Add (R). When that mana is spent to cast a red instant or sorcery spell, copy that spell and you may choose new targets for the copy."
+
+$icons = {
+    "(0)" => "Images/Templates/Icons/0.svg",
+    "(1)" => "Images/Templates/Icons/1.svg",
+    "(2)" => "Images/Templates/Icons/2.svg",
+    "(3)" => "Images/Templates/Icons/3.svg",
+    "(4)" => "Images/Templates/Icons/4.svg",
+    "(5)" => "Images/Templates/Icons/5.svg",
+    "(6)" => "Images/Templates/Icons/6.svg",
+    "(7)" => "Images/Templates/Icons/7.svg",
+    "(8)" => "Images/Templates/Icons/8.svg",
+    "(9)" => "Images/Templates/Icons/9.svg",
+    "(10)" => "Images/Templates/Icons/10.svg",
+    "(11)" => "Images/Templates/Icons/11.svg",
+    "(12)" => "Images/Templates/Icons/12.svg",
+    "(13)" => "Images/Templates/Icons/13.svg",
+    "(14)" => "Images/Templates/Icons/14.svg",
+    "(15)" => "Images/Templates/Icons/15.svg",
+    "(16)" => "Images/Templates/Icons/16.svg",
+    "(17)" => "Images/Templates/Icons/17.svg",
+    "(18)" => "Images/Templates/Icons/18.svg",
+    "(19)" => "Images/Templates/Icons/19.svg",
+    "(20)" => "Images/Templates/Icons/20.svg",
+    "(B)" => "Images/Templates/Icons/B.svg",
+    "(C)" => "Images/Templates/Icons/C.svg",
+    "(G)" => "Images/Templates/Icons/G.svg",
+    "(R)" => "Images/Templates/Icons/R.svg",
+    "(T)" => "Images/Templates/Icons/T.svg",
+    "(U)" => "Images/Templates/Icons/U.svg",
+    "(W)" => "Images/Templates/Icons/W.svg",
+    "(X)" => "Images/Templates/Icons/X.svg"
+}
 
 def addManaText(text, draw, frame, x, y)
-    iconPositions = []
-    icon = Image.read("Images/Templates/Icons/R.svg") { |img|
-        img.format = 'SVG'
-        img.background_color = 'transparent' }.first
-    icon.change_geometry!('40x40!') { |cols, rows, icon_img| icon_img.resize!(cols, rows) }
     newX = 0
     newY = 0
     splitText = text.split(/(\(.\))/).reject!(&:empty?)
 
     splitText.each do |item|
         if (item.match(/(\(.\))/)) then
-            if (newX < MAX_WIDTH) then
-                iconPositions.push([newX, newY])
-                newX += 50
-            else
+            iconFile = $icons[item.upcase]
+            icon = Image.read(iconFile) { |img|
+                img.format = 'SVG'
+                img.background_color = 'transparent' }.first
+            icon.change_geometry!('38x38!') { |cols, rows, icon_img| icon_img.resize!(cols, rows) }
+            if (newX > MAX_WIDTH) then
                 newY += 55
                 newX = 0
-                iconPositions.push([newX, newY])
-                newX += 50
             end
+            frame.composite!(icon, x + newX, y + newY + 2, OverCompositeOp)
+            newX += 38
         else
-            if (newX < MAX_WIDTH) then
-                draw.annotate(frame, 0, 0, x + newX, y + newY, item) { |ann| ann.gravity = NorthWestGravity }
-                newX += draw.get_type_metrics(frame, item).width
-            else
-                newY += 55
-                newX = 0
-                draw.annotate(frame, 0, 0, x + newX, y + newY, item) { |ann| ann.gravity = NorthWestGravity }
-                newX += draw.get_type_metrics(frame, item).width
+            item.split.each do |word|
+                width = draw.get_type_metrics(frame, word + " ").width
+                if (newX + width < MAX_WIDTH) then
+                    draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
+                    newX += width
+                else
+                    newY += 55
+                    newX = 0
+                    draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
+                    newX += width
+                end
             end
         end
     end
 
-    iconPositions.each do |pos|
-        frame.composite!(icon, x + pos[0], y + pos[1] + 1, OverCompositeOp)
-    end
     return frame
 end
 
