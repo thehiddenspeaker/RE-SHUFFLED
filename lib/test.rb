@@ -1,9 +1,9 @@
 require "rmagick"
 include Magick
 
-MAX_WIDTH = 800
+MAX_WIDTH = 830
 
-testFrame = Image.read("Images/Templates/mtg_colorless_frame.png")[0]
+testFrame = Image.read("Images/Templates/mtg_black_frame.png")[0]
 
 inputText = "At the beginning of combat on your turn, exile up to one target card from a graveyard.
 (1)(B): Adapt 2.
@@ -43,7 +43,7 @@ $icons = {
 
 $pointsize = 36
 
-def addManaText(text, draw, frame, x, y)
+def addManaText(text, draw, frame, x, y, pSize)
     newX = 0
     newY = 0
     splitText = text.split(/(\(.\))/).reject!(&:empty?)
@@ -55,14 +55,14 @@ def addManaText(text, draw, frame, x, y)
                 icon = Image.read(iconFile) { |img|
                     img.format = 'SVG'
                     img.background_color = 'transparent' }.first
-                iconDim = $pointsize * 38/46
+                iconDim = pSize * 38/46
                 icon.change_geometry!("#{iconDim}x#{iconDim}!") { |cols, rows, icon_img| icon_img.resize!(cols, rows) }
                 if (newX > MAX_WIDTH) then
-                    newY += $pointsize * 55/46
+                    newY += pSize * 55/46
                     newX = 0
                 end
                 frame.composite!(icon, x + newX, y + newY + 2, OverCompositeOp)
-                newX += $pointsize * 42/46
+                newX += pSize * 42/46
             end
         else
             item.split("\n").each do |line|
@@ -72,13 +72,13 @@ def addManaText(text, draw, frame, x, y)
                         draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
                         newX += width
                     else
-                        newY += $pointsize * 55/46
+                        newY += pSize * 55/46
                         newX = 0
                         draw.annotate(frame, 0, 0, x + newX, y + newY, word + " ") { |ann| ann.gravity = NorthWestGravity }
                         newX += width
                     end
                 end
-                newY += $pointsize * 65/46
+                newY += pSize * 65/46
                 newX = 0
             end
         end
@@ -87,11 +87,13 @@ def addManaText(text, draw, frame, x, y)
     return frame
 end
 
-draw = Draw.new
-draw.fill = "black"
-draw.pointsize = $pointsize
-draw.font = "Fonts/MPlantin-Regular.ttf"
+if __FILE__ == $0 then
+    draw = Draw.new
+    draw.fill = "black"
+    draw.pointsize = $pointsize
+    draw.font = "Fonts/MPlantin-Regular.ttf"
 
-newImage = addManaText(inputText, draw, testFrame, 90, 900)
+    newImage = addManaText(inputText, draw, testFrame, 85, 900, $pointsize)
 
-newImage.write("testImage.png")
+    newImage.write("testImage.png")
+end
