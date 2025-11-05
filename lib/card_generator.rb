@@ -35,7 +35,7 @@ class CardGenerator
     # ---- Rules box ----
     draw.pointsize = 46
     draw.font = "Fonts/MPlantin-Regular.ttf"
-    wrapped_rules = wrap_text(card.rules, 40)   # ❌ error here before
+    wrapped_rules = wrap_text(card.rules, 40)   
     draw.annotate(img, 0, 0, 95, 900, wrapped_rules) { |ann| ann.gravity = Magick::NorthWestGravity }
 
     # ---- Flavor text ----
@@ -55,6 +55,7 @@ output_path = "public/output/#{output_filename}"
 final_card.write(output_path)
 
 # Return URL path
-"/output/#{output_filename}"
+timestamp = Time.now.to_i
+"/output/#{output_filename}?t=#{Time.now.to_i}"
   end
 end
