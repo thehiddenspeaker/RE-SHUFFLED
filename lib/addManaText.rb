@@ -43,6 +43,13 @@ $icons = {
     "(X)" => "Images/Templates/Icons/X.svg"
 }
 
+$rarities = {
+    "common" => "Images/Templates/Rarities/C.svg",
+    "uncommon" => "Images/Templates/Rarities/U.svg",
+    "rare" => "Images/Templates/Rarities/R.svg",
+    "mythic" => "Images/Templates/Rarities/M.svg"
+}
+
 $pointsize = 36
 
 def addManaText(text, draw, frame, pSize)
@@ -89,8 +96,6 @@ def addManaText(text, draw, frame, pSize)
             end
         end
     end
-
-    return frame
 end
 
 def addManaCost(text, draw, frame)
@@ -111,7 +116,17 @@ def addManaCost(text, draw, frame)
             end
         end
     end
-    return frame
+end
+
+def addRarity(text, draw, frame)
+    rarityIcon = $rarities.fetch(text.downcase) { nil }
+    if !rarityIcon.nil? then
+        icon = Image.read(rarityIcon) { |img|
+            img.format = 'SVG'
+            img.background_color = 'transparent' }.first
+        icon.change_geometry!("60x60!") { |cols, rows, icon_img| icon_img.resize!(cols, rows) }
+        frame.composite!(icon, 865, 800, OverCompositeOp)
+    end
 end
 
 if __FILE__ == $0 then

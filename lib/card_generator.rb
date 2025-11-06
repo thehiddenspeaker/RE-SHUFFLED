@@ -21,12 +21,13 @@ class CardGenerator
     # ---- Name bar ----
     draw.pointsize = 52
     draw.annotate(img, 0, 0, 90, 85, card.name) { |ann| ann.gravity = Magick::NorthWestGravity }
-    img = addManaCost(card.manaCost, draw, img)
+    addManaCost(card.manaCost, draw, img)
 
     # ---- Type line ----
     typeString = card.subType.strip.empty? ? card.type : "#{card.type} — #{card.subType}"
     draw.pointsize = 48
     draw.annotate(img, 0, 0, 90, 810, typeString) { |ann| ann.gravity = Magick::NorthWestGravity }
+    addRarity(card.rarity, draw, img)
 
     # ---- Stats box ----
     unless card.stats.strip.empty?
@@ -37,7 +38,7 @@ class CardGenerator
     # ---- Rules box ----
     draw.pointsize = 46
     draw.font = "Fonts/MPlantin-Regular.ttf"
-    img = addManaText(card.rules, draw, img, 46)
+    addManaText(card.rules, draw, img, 46)
 
     # ---- Flavor text ----
     draw.font = "Fonts/MPlantin-Italic-Regular.ttf"
