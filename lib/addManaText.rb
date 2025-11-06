@@ -3,13 +3,13 @@ include Magick
 
 MAX_WIDTH = 830
 
-testFrame = Image.read("Images/Templates/mtg_black_frame.png")[0]
+#testFrame = Image.read("Images/Templates/mtg_black_frame.png")[0]
 
-inputMana = "(1)(B)"
+#inputMana = "(1)(B)"
 
-inputText = "At the beginning of combat on your turn, exile up to one target card from a graveyard.
-(1)(B): Adapt 2.
-Whenever one or more +1/+1 counters are put on this creature, put a creature card exiled with this creature onto the battlefield under your control with a finality counter on it. It gains haste. Sacrifice it at the beginning of the next end step."
+#inputText = "At the beginning of combat on your turn, exile up to one target card from a graveyard.
+#(1)(B): Adapt 2.
+#Whenever one or more +1/+1 counters are put on this creature, put a creature card exiled with this creature onto the battlefield under your control with a finality counter on it. It gains haste. Sacrifice it at the beginning of the next end step."
 
 $icons = {
     "(0)" => "Images/Templates/Icons/0.svg",
@@ -50,7 +50,25 @@ $rarities = {
     "mythic" => "Images/Templates/Rarities/M.svg"
 }
 
-$pointsize = 36
+$frames = {
+    "B" => ["Images/Templates/mtg_black_frame.png", "Images/Templates/mtg_black_frame_creature.png"],
+    "BG" => ["Images/Templates/mtg_bg_frame.png", "Images/Templates/mtg_bg_frame_creature.png"],
+    "BR" => ["Images/Templates/mtg_br_frame.png", "Images/Templates/mtg_br_frame_creature.png"],
+    "BU" => ["Images/Templates/mtg_ub_frame.png", "Images/Templates/mtg_ub_frame_creature.png"],
+    "BW" => ["Images/Templates/mtg_wb_frame.png", "Images/Templates/mtg_wb_frame_creature.png"],
+    "G" => ["Images/Templates/mtg_green_frame.png", "Images/Templates/mtg_green_frame_creature.png"],
+    "GR" => ["Images/Templates/mtg_rg_frame.png", "Images/Templates/mtg_rg_frame_creature.png"],
+    "GU" => ["Images/Templates/mtg_ug_frame.png", "Images/Templates/mtg_ug_frame_creature.png"],
+    "GW" => ["Images/Templates/mtg_wg_frame.png", "Images/Templates/mtg_wg_frame_creature.png"],
+    "R" => ["Images/Templates/mtg_red_frame.png", "Images/Templates/mtg_red_frame_creature.png"],
+    "RW" => ["Images/Templates/mtg_wr_frame.png", "Images/Templates/mtg_wr_frame_creature.png"],
+    "RU" => ["Images/Templates/mtg_ur_frame.png", "Images/Templates/mtg_ur_frame_creature.png"],
+    "U" => ["Images/Templates/mtg_blue_frame.png", "Images/Templates/mtg_blue_frame_creature.png"],
+    "UW" => ["Images/Templates/mtg_wu_frame.png", "Images/Templates/mtg_wu_frame_creature.png"],
+    "W" => ["Images/Templates/mtg_white_frame.png", "Images/Templates/mtg_white_frame_creature.png"],
+    "C" => ["Images/Templates/mtg_colorless_frame.png", "Images/Templates/mtg_colorless_frame_creature.png"],
+    "M" => ["Images/Templates/mtg_multicolor_frame.png", "Images/Templates/mtg_multicolor_frame_creature.png"]
+}
 
 def addManaText(text, draw, frame, pSize)
     newX = 0
@@ -87,7 +105,7 @@ def addManaText(text, draw, frame, pSize)
                         draw.annotate(frame, 0, 0, 85 + newX, 900 + newY, word) { |ann| ann.gravity = NorthWestGravity }
                         newX += width
                     else
-                        newY += pSize * 50/46
+                        newY += pSize * 48/46
                         newX = 0
                         draw.annotate(frame, 0, 0, 85 + newX, 900 + newY, word) { |ann| ann.gravity = NorthWestGravity }
                         newX += width
@@ -118,6 +136,21 @@ def addManaCost(text, draw, frame)
     end
 end
 
+def detectFrame(text)
+    colorID = ""
+    mana = text.split(/(\(\w\)|\(\w\w\))/).reject {|elem| elem.empty?}
+    mana.each do |m|
+        c = m.upcase.match(/[WUBRG]/).to_s
+        if !colorID.include?(c) then
+            colorID += c
+        end
+    end
+    if colorID == "" then colorID = "C" end
+    if colorID.length > 2 then colorID = "M" end
+    colorID.chars.sort.join
+    return $frames[colorID]
+end
+
 def addRarity(text, draw, frame)
     rarityIcon = $rarities.fetch(text.downcase) { nil }
     if !rarityIcon.nil? then
@@ -130,13 +163,17 @@ def addRarity(text, draw, frame)
 end
 
 if __FILE__ == $0 then
+    pointsize = 36
+
     draw = Draw.new
     draw.fill = "black"
-    draw.pointsize = $pointsize
+    draw.pointsize = pointsize
     draw.font = "Fonts/MPlantin-Regular.ttf"
 
-    newImage = addManaText(inputText, draw, testFrame, $pointsize)
-    newImage = addManaCost(inputMana, draw, newImage)
+    #newImage = addManaText(inputText, draw, testFrame, pointsize)
+    #newImage = addManaCost(inputMana, draw, newImage)
 
-    newImage.write("testImage.png")
+    #newImage.write("testImage.png")
+
+    detectFrame("(B)(B)(W)")
 end

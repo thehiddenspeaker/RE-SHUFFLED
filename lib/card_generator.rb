@@ -9,9 +9,10 @@ class CardGenerator
 
   def self.generate(card)
     # pick template
+    template_color = detectFrame(card.manaCost)
     template_path = card.stats.strip.empty? ? 
-      "Images/Templates/mtg_colorless_frame.png" :
-      "Images/Templates/mtg_colorless_frame_creature.png"
+      template_color[0] :
+      template_color[1]
 
     img = Magick::Image.read(template_path).first
     draw = Magick::Draw.new
@@ -32,7 +33,7 @@ class CardGenerator
     # ---- Stats box ----
     unless card.stats.strip.empty?
       draw.pointsize = 52
-      draw.annotate(img, 40, 20, 845, 1290, card.stats) { |ann| ann.gravity = Magick::CenterGravity }
+      draw.annotate(img, 40, 20, 845, 1285, card.stats) { |ann| ann.gravity = Magick::CenterGravity }
     end
 
     # ---- Rules box ----
