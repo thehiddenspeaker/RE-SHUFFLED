@@ -35,7 +35,7 @@ post "/generate_card" do
   # --- Save art file locally ---
   Dir.mkdir("Images") unless Dir.exist?("Images")
   Dir.mkdir("Images/Art") unless Dir.exist?("Images/Art")
-  filename = "#{Time.now.to_i}_#{params[:art][:filename]}"
+  filename = "#{params[:art][:filename]}"
   art_path = "Images/Art/#{filename}"
 
   File.open(art_path, "wb") { |f| f.write(art_file.read) }
