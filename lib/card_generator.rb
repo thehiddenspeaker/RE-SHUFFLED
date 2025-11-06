@@ -37,14 +37,9 @@ class CardGenerator
     end
 
     # ---- Rules box ----
-    draw.pointsize = 46
+    #draw.pointsize = 46
     draw.font = "Fonts/MPlantin-Regular.ttf"
-    addManaText(card.rules, draw, img, 46)
-
-    # ---- Flavor text ----
-    draw.font = "Fonts/MPlantin-Italic-Regular.ttf"
-    wrapped_flavor = wrap_text(card.flavor, 40)
-    draw.annotate(img, 0, 0, 95, 1090, wrapped_flavor) { |ann| ann.gravity = Magick::NorthWestGravity }
+    addManaText(card.rules, card.flavor, draw, img)
 
     # --- Art ---
     art = Magick::Image.read(card.art).first

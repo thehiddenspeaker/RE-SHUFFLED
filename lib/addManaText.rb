@@ -53,38 +53,37 @@ $rarities = {
 $frames = {
     "B" => ["Images/Templates/mtg_black_frame.png", "Images/Templates/mtg_black_frame_creature.png"],
     "BG" => ["Images/Templates/mtg_bg_frame.png", "Images/Templates/mtg_bg_frame_creature.png"],
-    "GB" => ["Images/Templates/mtg_bg_frame.png", "Images/Templates/mtg_bg_frame_creature.png"],
     "BR" => ["Images/Templates/mtg_br_frame.png", "Images/Templates/mtg_br_frame_creature.png"],
-    "RB" => ["Images/Templates/mtg_br_frame.png", "Images/Templates/mtg_br_frame_creature.png"],
     "BU" => ["Images/Templates/mtg_ub_frame.png", "Images/Templates/mtg_ub_frame_creature.png"],
-    "UB" => ["Images/Templates/mtg_ub_frame.png", "Images/Templates/mtg_ub_frame_creature.png"],
     "BW" => ["Images/Templates/mtg_wb_frame.png", "Images/Templates/mtg_wb_frame_creature.png"],
-    "WB" => ["Images/Templates/mtg_wb_frame.png", "Images/Templates/mtg_wb_frame_creature.png"],
     "G" => ["Images/Templates/mtg_green_frame.png", "Images/Templates/mtg_green_frame_creature.png"],
     "GR" => ["Images/Templates/mtg_rg_frame.png", "Images/Templates/mtg_rg_frame_creature.png"],
-    "RG" => ["Images/Templates/mtg_rg_frame.png", "Images/Templates/mtg_rg_frame_creature.png"],
     "GU" => ["Images/Templates/mtg_ug_frame.png", "Images/Templates/mtg_ug_frame_creature.png"],
-    "UG" => ["Images/Templates/mtg_ug_frame.png", "Images/Templates/mtg_ug_frame_creature.png"],
     "GW" => ["Images/Templates/mtg_wg_frame.png", "Images/Templates/mtg_wg_frame_creature.png"],
-    "WG" => ["Images/Templates/mtg_wg_frame.png", "Images/Templates/mtg_wg_frame_creature.png"],
     "R" => ["Images/Templates/mtg_red_frame.png", "Images/Templates/mtg_red_frame_creature.png"],
     "RW" => ["Images/Templates/mtg_wr_frame.png", "Images/Templates/mtg_wr_frame_creature.png"],
-    "WR" => ["Images/Templates/mtg_wr_frame.png", "Images/Templates/mtg_wr_frame_creature.png"],
     "RU" => ["Images/Templates/mtg_ur_frame.png", "Images/Templates/mtg_ur_frame_creature.png"],
-    "UR" => ["Images/Templates/mtg_ur_frame.png", "Images/Templates/mtg_ur_frame_creature.png"],
     "U" => ["Images/Templates/mtg_blue_frame.png", "Images/Templates/mtg_blue_frame_creature.png"],
     "UW" => ["Images/Templates/mtg_wu_frame.png", "Images/Templates/mtg_wu_frame_creature.png"],
-    "WU" => ["Images/Templates/mtg_wu_frame.png", "Images/Templates/mtg_wu_frame_creature.png"],
     "W" => ["Images/Templates/mtg_white_frame.png", "Images/Templates/mtg_white_frame_creature.png"],
     "C" => ["Images/Templates/mtg_colorless_frame.png", "Images/Templates/mtg_colorless_frame_creature.png"],
     "M" => ["Images/Templates/mtg_multicolor_frame.png", "Images/Templates/mtg_multicolor_frame_creature.png"]
 }
 
-def addManaText(text, draw, frame, pSize)
+def addManaText(text, flavor, draw, frame)
     newX = 0
     newY = 0
     splitText = text.split(/(\(\w\)|\(\w\w\))/).reject {|elem| elem.empty?}
     splitText ||= [text]
+    textBox = Image.new(855, 420) { |img|
+        img.background_color = 'transparent'
+    }
+
+    totalText = text + flavor
+    textScale = (totalText.length.clamp(200, 300) - 200) / 100.0
+    pSize = 50 - 14.0 * textScale
+    draw.pointsize = pSize
+    puts pSize
 
     splitText.each do |item|
         if (item.match(/(\(\w\)|\(\w\w\))/)) then
@@ -93,37 +92,65 @@ def addManaText(text, draw, frame, pSize)
                 icon = Image.read(iconFile) { |img|
                     img.format = 'SVG'
                     img.background_color = 'transparent' }.first
-                iconDim = pSize * 38/46
+                iconDim = pSize * 38/46.0
                 icon.change_geometry!("#{iconDim}x#{iconDim}!") { |cols, rows, icon_img| icon_img.resize!(cols, rows) }
                 if (newX > MAX_WIDTH) then
-                    newY += pSize * 55/46
+                    newY += pSize * 55/46.0
                     newX = 0
                 end
-                frame.composite!(icon, 85 + newX, 900 + newY + 2, OverCompositeOp)
-                newX += pSize * 42/46
+                textBox.composite!(icon, newX, newY + 2, OverCompositeOp)
+                newX += pSize * 42/46.0
             end
         else
             item.split(/(?<=\s)|(?=\s)/).each do |word|
                 if word == "\n" then
-                    newY += pSize * 65/46
+                    newY += pSize * 65/46.0
                     newX = 0
                 elsif word.match(/\s+/) then
-                    newX += pSize * 10/46
+                    newX += pSize * 10/46.0
                 else
                     width = draw.get_type_metrics(frame, word).width
                     if (newX + width < MAX_WIDTH) then
-                        draw.annotate(frame, 0, 0, 85 + newX, 900 + newY, word) { |ann| ann.gravity = NorthWestGravity }
+                        draw.annotate(textBox, 0, 0, newX, newY, word) { |ann| ann.gravity = NorthWestGravity }
                         newX += width
                     else
-                        newY += pSize * 48/46
+                        newY += pSize * 48/46.0
                         newX = 0
-                        draw.annotate(frame, 0, 0, 85 + newX, 900 + newY, word) { |ann| ann.gravity = NorthWestGravity }
+                        draw.annotate(textBox, 0, 0, newX, newY, word) { |ann| ann.gravity = NorthWestGravity }
                         newX += width
                     end
                 end
             end
         end
     end
+
+    draw.font = "Fonts/MPlantin-Italic-Regular.ttf"
+    newX = 0
+    flavorY = newY + pSize * 65/46.0
+    splitFlavor = flavor.split(/(?<=\s)|(?=\s)/)
+    splitFlavor.each do |word|
+        if word.match(/\s+/) then
+            newX += pSize * 10/46.0
+        else
+            width = draw.get_type_metrics(frame, word).width
+            if (newX + width < MAX_WIDTH) then
+                draw.annotate(textBox, 0, 0, newX, flavorY, word) { |ann| ann.gravity = NorthWestGravity }
+                newX += width
+            else
+                flavorY += pSize * 48/46.0
+                newX = 0
+                draw.annotate(textBox, 0, 0, newX, flavorY, word) { |ann| ann.gravity = NorthWestGravity }
+                newX += width
+            end
+        end
+    end
+
+    if newY < 190 - pSize * 65/46.0 then 
+        newY = 190 - pSize * 65/46.0 - newY 
+    else
+        newY = 0
+    end
+    frame.composite!(textBox, 85, 900 + newY, OverCompositeOp)
 end
 
 def addManaCost(text, draw, frame)
@@ -157,7 +184,7 @@ def detectFrame(text)
     end
     if colorID == "" then colorID = "C" end
     if colorID.length > 2 then colorID = "M" end
-    colorID.chars.sort.join
+    colorID = colorID.chars.sort.join
     return $frames[colorID]
 end
 
@@ -185,5 +212,5 @@ if __FILE__ == $0 then
 
     #newImage.write("testImage.png")
 
-    detectFrame("(B)(B)(W)")
+    detectFrame("(W)(B)")
 end
