@@ -1,3 +1,5 @@
+require_relative "addManaText.rb"
+
 class CardGenerator
   def self.wrap_text(text, max_chars)
     text.split("\n").flat_map do |line|
@@ -18,8 +20,8 @@ class CardGenerator
 
     # ---- Name bar ----
     draw.pointsize = 52
-    draw.annotate(img, 0, 0, 90, 80, card.name) { |ann| ann.gravity = Magick::NorthWestGravity }
-    draw.annotate(img, 1000, 100, 90, 60, card.manaCost) { |ann| ann.gravity = Magick::EastGravity }
+    draw.annotate(img, 0, 0, 90, 85, card.name) { |ann| ann.gravity = Magick::NorthWestGravity }
+    img = addManaCost(card.manaCost, draw, img)
 
     # ---- Type line ----
     typeString = card.subType.strip.empty? ? card.type : "#{card.type} — #{card.subType}"
@@ -35,8 +37,7 @@ class CardGenerator
     # ---- Rules box ----
     draw.pointsize = 46
     draw.font = "Fonts/MPlantin-Regular.ttf"
-    wrapped_rules = wrap_text(card.rules, 40)   # ❌ error here before
-    draw.annotate(img, 0, 0, 95, 900, wrapped_rules) { |ann| ann.gravity = Magick::NorthWestGravity }
+    img = addManaText(card.rules, draw, img, 46)
 
     # ---- Flavor text ----
     draw.font = "Fonts/MPlantin-Italic-Regular.ttf"
@@ -49,12 +50,12 @@ class CardGenerator
     final_card = img.composite(art, 77, 159, Magick::SrcOverCompositeOp)
 
     # --- Save output ---
-Dir.mkdir("public/output") unless Dir.exist?("public/output")
-output_filename = "#{card.name.strip.gsub(/\s+/, '_')}.png"
-output_path = "public/output/#{output_filename}"
-final_card.write(output_path)
+    Dir.mkdir("public/output") unless Dir.exist?("public/output")
+    output_filename = "#{card.name.strip.gsub(/\s+/, '_')}.png"
+    output_path = "public/output/#{output_filename}"
+    final_card.write(output_path)
 
-# Return URL path
-"/output/#{output_filename}"
+    # Return URL path
+    "/output/#{output_filename}"
   end
 end

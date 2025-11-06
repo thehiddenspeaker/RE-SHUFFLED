@@ -46,6 +46,10 @@ post "/generate_card" do
  # --- Generate final image ---
 output_url = CardGenerator.generate(card)
 
+if File.exist?(art_path)
+  File.delete(art_path)
+end
+
 # --- Respond with JSON ---
 content_type :json
 host = request.base_url
