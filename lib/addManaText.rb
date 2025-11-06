@@ -48,11 +48,11 @@ $pointsize = 36
 def addManaText(text, draw, frame, pSize)
     newX = 0
     newY = 0
-    splitText = text.split(/(\(\w\))/).reject {|elem| elem.empty?}
+    splitText = text.split(/(\(\w\)|\(\w\w\))/).reject {|elem| elem.empty?}
     splitText ||= [text]
 
     splitText.each do |item|
-        if (item.match(/(\(.\))/)) then
+        if (item.match(/(\(\w\)|\(\w\w\))/)) then
             iconFile = $icons.fetch(item.upcase) { nil }
             if !iconFile.nil? then
                 icon = Image.read(iconFile) { |img|
@@ -73,7 +73,7 @@ def addManaText(text, draw, frame, pSize)
                     newY += pSize * 65/46
                     newX = 0
                 elsif word.match(/\s+/) then
-                    newX += pSize * 12/46
+                    newX += pSize * 10/46
                 else
                     width = draw.get_type_metrics(frame, word).width
                     if (newX + width < MAX_WIDTH) then
@@ -95,9 +95,9 @@ end
 
 def addManaCost(text, draw, frame)
     x = 0
-    splitText = text.split(/(\(\w\))/).reject {|elem| elem.empty?}
+    splitText = text.split(/(\(\w\)|\(\w\w\))/).reject {|elem| elem.empty?}
     splitText.reverse_each do |item|
-        if (item.match(/(\(.\))/)) then
+        if (item.match(/(\(\w\)|\(\w\w\))/)) then
             iconFile = $icons.fetch(item.upcase) { nil }
             if !iconFile.nil? then
                 icon = Image.read(iconFile) { |img|
