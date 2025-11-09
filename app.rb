@@ -8,6 +8,7 @@ require_relative "./lib/card_generator"
 configure do
   enable :cross_origin
   set :public_folder, "public"
+  set :port, 3001
 end
 
 before do
