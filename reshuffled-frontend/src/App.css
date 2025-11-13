@@ -4,8 +4,20 @@
 	font-weight: 400;
 	font-style: normal;
 }
+.barlow-light {
+  font-family: "Barlow", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.barlow-regular {
+  font-family: "Barlow Regular", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
 body {
 	background-color: #ffd6b6;
+	font-family: "Barlow Regular", sans-serif;
 }
 .App {
 	text-align: center;
@@ -23,4 +35,11 @@ body {
 	/* padding: 0.2rem; */
 	font-family: "Stack Sans Notch", sans-serif;
 	color: #ffd6b6;
+}
+.titles {
+	font-family: "Barlow Regular", sans-serif;
+}
+
+.utility-section {
+	padding: 0.2rem;
 }

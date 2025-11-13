@@ -10,8 +10,21 @@ import {
 	Textarea,
 	Button,
 	Notification,
+	Divider,
+	Text,
+	ActionIcon,
+	FileButton,
+	Stack,
 } from "@mantine/core";
-import { IconX, IconCheck } from "@tabler/icons-react";
+import {
+	IconX,
+	IconCheck,
+	IconRestore,
+	IconFileTypeJpg,
+	IconFileTypePdf,
+	IconFileTypePng,
+	IconArrowBack,
+} from "@tabler/icons-react";
 import "./App.css";
 
 function App() {
@@ -27,6 +40,7 @@ function App() {
 	});
 	const [artFile, setArtFile] = useState(null);
 	const [artPreview, setArtPreview] = useState(null);
+	const [imageUrl, setImageUrl] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [notification, setNotification] = useState(null);
 	const [generatedImage, setGeneratedImage] = useState(null);
@@ -47,11 +61,20 @@ function App() {
 		}
 	};
 
+	const handleUrlChange = (value) => {
+		setImageUrl(value);
+		setArtFile(null);
+
+		if(value) {
+			setArtPreview(value);
+		}
+	};
+
 	const handleSubmit = async () => {
-		if (!artFile) {
+		if (!artFile && !imageUrl) {
 			setNotification({
 				type: "error",
-				message: "Please upload an image!",
+				message: "Please upload an image or provide an image URL!",
 			});
 			return;
 		}
@@ -67,7 +90,12 @@ function App() {
 		formData.append("rules", cardData.rules);
 		formData.append("flavor", cardData.flavor);
 		formData.append("stats", cardData.stats);
-		formData.append("art", artFile);
+		if(artFile){
+			formData.append("art", artFile);
+		} else if (imageUrl) {
+			formData.append("imageUrl", imageUrl);
+		}
+		
 
 		try {
 			const response = await fetch("http://localhost:3001/generate_card", {
@@ -99,6 +127,72 @@ function App() {
 		}
 	};
 
+	const handleDownload = async (format) => {
+		if (!generatedImage) {
+			setNotification({
+				type: "error",
+				message: "No card to download. Please generate a card first.",
+			});
+			return;
+		}
+
+		try {
+			const url = new URL(generatedImage);
+			const pathname = url.pathname;
+			const filename = pathname.split('/').pop().split('?')[0];
+
+			const response = await fetch(`http://localhost:3001/download/${filename}/${format}`);
+			const data = await response.json();
+
+			if (data.success){
+				// const fileUrl = `http://localhost:3001${data.download_path}`;
+				// const fileBlob = await fetch(fileUrl);
+				// const blob = await fileBlob.blob();
+
+				// const blobUrl = window.URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = `http://localhost:3001${data.download_path}`;
+				link.download = `${cardData.name || "card"}.${format}`;
+				link.setAttribute('target', '_blank');
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				// window.URL.revokeObjectURL(blobUrl);
+
+				setNotification({
+					type: "success",
+					message: `Card downloaded as ${format.toUpperCase()}!`,
+				});
+			} else {
+				throw new Error(data.error);
+			}
+		} catch (err) {
+			setNotification({
+				type: "error",
+				message: "Failed to download card.",
+			});
+		}
+	};
+
+	// Card Reset
+	const resetForm = () => {
+		setCardData({
+			name: "",
+			mana_cost: "",
+			type: "",
+			subtype: "",
+			rarity: "",
+			rules: "",
+			flavor: "",
+			stats: "",
+		});
+		setArtFile(null);
+		setArtPreview(null);
+		setImageUrl("");
+		setGeneratedImage(null);
+		setNotification(null);
+	};
+
 	return (
 		<>
 			<NavBar />
@@ -124,11 +218,11 @@ function App() {
 
 			<SimpleGrid cols={2} spacing="xs" verticalSpacing="xs">
 				<div>
-					<Title order={2} p="md" ta="center">
+					<Title order={2} p="md" ta="center" className="titles">
 						Create a Magic: The Gathering Card
 					</Title>
 
-					<Container>
+					<Container style={{ maxWidth: 600 }}>
 						<Group mb="md" grow>
 							<TextInput
 								label="Card Name"
@@ -177,21 +271,42 @@ function App() {
 							mb="md"
 						/>
 						<TextInput
-							label="stats"
+							label="Stats"
 							placeholder="e.g., (3/2)"
 							value={cardData.stats}
 							onChange={(e) => handleChange(e.target.value, "stats")}
 							mb="md"
 						/>
 
-						<FileInput
-							label="Upload Card Art"
-							placeholder="Choose an image file"
-							accept="image/*"
-							onChange={handleFileChange}
-							mb="md"
-						/>
+						<Divider label="Card Art" labelPosition="center" size="sm" />
+						<Group>
+							<Stack>
+								<FileButton
+									label="Upload Card Art"
+									placeholder="Choose an image file"
+									accept="image/*"
+									onChange={handleFileChange}
+									mb="md"
+									disabled={!!imageUrl}
+								>
+									{(props) => <Button {...props}>Upload image</Button>}
+								</FileButton>
 
+								{artFile && (
+									<Text size="sm" ta="center" c="dimmed">
+										{artFile.name}
+									</Text>
+								)}
+							</Stack>
+
+							<TextInput
+								label="Image URL"
+								placeholder="Provide image URL..."
+								value={imageUrl}
+								onChange={(e) => handleUrlChange(e.target.value)}
+								disabled={!!artFile}
+							/>
+						</Group>
 						<Button
 							loading={loading}
 							fullWidth
@@ -205,59 +320,103 @@ function App() {
 				</div>
 
 				<div style={styles.previewContainer}>
-					<Title order={2} mb="xl" ta="center">
+					<Title order={2} mb="xl" ta="center" className="titles">
 						{generatedImage ? "Generated Card" : "Card Preview"}
 					</Title>
 
 					{generatedImage ? (
-						<img
-							src={generatedImage}
-							alt="Generated Card"
-							style={styles.image}
+						<>
+							<img
+								src={generatedImage}
+								alt="Generated Card"
+								style={styles.image}
 							/>
-					):(
-					<div style={styles.card}>
-						<div style={styles.cardHeader}>
-							<div style={styles.cardName}>{cardData.name || "Untitled"}</div>
-							<div style={styles.manaCost}>{cardData.mana_cost || "0"}</div>
-						</div>
 
-						{/* Card Art */}
-						<div style={styles.cardArt}>
-							{artPreview ? (
-								<img src={artPreview} alt="Card art" style={styles.artImage} />
-							) : (
-								<div style={styles.artPlaceholder}>Upload image to preview</div>
-							)}
-						</div>
-
-						{/* Type Line */}
-						<div style={styles.typeLine}>
-							{cardData.type && cardData.subtype
-								? `${cardData.type} — ${cardData.subtype}`
-								: cardData.type || "Card Type"}
-						</div>
-
-						{/* Rules Text */}
-						<div style={styles.rulesBox}>
-							<div style={styles.rulesText}>
-								{cardData.rules || "Rules text will appear here"}
+							<Group className="utility-section">
+								<ActionIcon
+									variant="filed"
+									size="xl"
+									aria-label="Reset"
+									onClick={resetForm}
+								>
+									<IconArrowBack
+										style={{ width: "70%", height: "70%" }}
+										stroke={1.5}
+									/>
+								</ActionIcon>
+								<ActionIcon
+									variant="filled"
+									size="xl"
+									aria-label="Download as PNG"
+									onClick={() => handleDownload("png")}
+								>
+									<IconFileTypePng
+										style={{ width: "70%", height: "70%" }}
+										stroke={1.5}
+									/>
+								</ActionIcon>
+								<ActionIcon
+									variant="filled"
+									size="xl"
+									aria-label="Download as JPG"
+									onClick={() => handleDownload("jpg")}
+								>
+									<IconFileTypeJpg
+										style={{ width: "70%", height: "70%" }}
+										stroke={1.5}
+									/>
+								</ActionIcon>
+							</Group>
+						</>
+					) : (
+						<div style={styles.card}>
+							<div style={styles.cardHeader}>
+								<div style={styles.cardName}>{cardData.name || "Untitled"}</div>
+								<div style={styles.manaCost}>{cardData.mana_cost || "0"}</div>
 							</div>
-							{cardData.flavor && (
-								<div style={styles.flavorText}>
-									<em>{cardData.flavor}</em>
-								</div>
-							)}
-						</div>
 
-						{/* Bottom Section */}
-						<div style={styles.cardBottom}>
-							<div style={styles.rarity}>{cardData.rarity || "Rarity"}</div>
-							{cardData.stats && (
-								<div style={styles.stats}>{cardData.stats}</div>
-							)}
+							{/* Card Art */}
+							<div style={styles.cardArt}>
+								{artPreview ? (
+									<img
+										src={artPreview}
+										alt="Card art"
+										style={styles.artImage}
+									/>
+								) : (
+									<div style={styles.artPlaceholder}>
+										Upload image to preview
+									</div>
+								)}
+							</div>
+
+							{/* Type Line */}
+							<div style={styles.typeLine}>
+								{cardData.type && cardData.subtype
+									? `${cardData.type} — ${cardData.subtype}`
+									: cardData.type || "Type"}
+							</div>
+
+							{/* Rules Text */}
+							<div style={styles.rulesBox}>
+								<div style={styles.rulesText}>
+									{cardData.rules || "Rules text will appear here"}
+								</div>
+								{cardData.flavor && (
+									<div style={styles.flavorText}>
+										<em>{cardData.flavor}</em>
+									</div>
+								)}
+							</div>
+
+							{/* Bottom Section */}
+							<div style={styles.cardBottom}>
+								<div style={styles.rarity}>{cardData.rarity || "Rarity"}</div>
+								{cardData.stats && (
+									<div style={styles.stats}>{cardData.stats}</div>
+								)}
+							</div>
 						</div>
-					</div>
 					)}
 				</div>
 			</SimpleGrid>
@@ -268,6 +427,7 @@ function App() {
 const styles = {
 	previewContainer: {
 		padding: "1rem",
+		paddingLeft: "0",
 		display: "flex",
 		flexDirection: "column",
 		alignItems: "center",
@@ -278,7 +438,7 @@ const styles = {
 		borderRadius: "12px",
 		overflow: "hidden",
 		boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-		border: "8px solid #8b7355",
+		border: "8px solid #4a171e",
 		fontFamily: "'Beleren', serif",
 	},
 	cardHeader: {
@@ -286,7 +446,7 @@ const styles = {
 		justifyContent: "space-between",
 		alignItems: "center",
 		padding: "12px 15px",
-		background: "linear-gradient(to bottom, #d4c5a9 0%, #b8a68a 100%)",
+		background: "#ffd6b6",
 		borderBottom: "2px solid #8b7355",
 	},
 	cardName: {

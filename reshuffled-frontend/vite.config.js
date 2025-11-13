@@ -10,6 +10,10 @@ export default defineConfig({
 				target: "http://localhost:3001",
 				changeOrigin: true,
 			},
+			'^/(generate_card|download)': {
+				target: "https://localhost:3001",
+				changeOrigin: true,
+			}
 		},
 	},
 });
