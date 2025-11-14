@@ -2,26 +2,25 @@ import { useState } from "react";
 import NavBar from "./components/navbar";
 import {
 	Container,
-	FileInput,
 	Group,
 	SimpleGrid,
 	TextInput,
 	Title,
 	Textarea,
 	Button,
+	Paper,
 	Notification,
-	Divider,
 	Text,
 	ActionIcon,
 	FileButton,
 	Stack,
+	Flex,
+	Card,
 } from "@mantine/core";
 import {
 	IconX,
 	IconCheck,
-	IconRestore,
 	IconFileTypeJpg,
-	IconFileTypePdf,
 	IconFileTypePng,
 	IconArrowBack,
 } from "@tabler/icons-react";
@@ -65,7 +64,7 @@ function App() {
 		setImageUrl(value);
 		setArtFile(null);
 
-		if(value) {
+		if (value) {
 			setArtPreview(value);
 		}
 	};
@@ -90,12 +89,11 @@ function App() {
 		formData.append("rules", cardData.rules);
 		formData.append("flavor", cardData.flavor);
 		formData.append("stats", cardData.stats);
-		if(artFile){
+		if (artFile) {
 			formData.append("art", artFile);
 		} else if (imageUrl) {
 			formData.append("imageUrl", imageUrl);
 		}
-		
 
 		try {
 			const response = await fetch("http://localhost:3001/generate_card", {
@@ -139,21 +137,23 @@ function App() {
 		try {
 			const url = new URL(generatedImage);
 			const pathname = url.pathname;
-			const filename = pathname.split('/').pop().split('?')[0];
+			const filename = pathname.split("/").pop().split("?")[0];
 
-			const response = await fetch(`http://localhost:3001/download/${filename}/${format}`);
+			const response = await fetch(
+				`http://localhost:3001/download/${filename}/${format}`
+			);
 			const data = await response.json();
 
-			if (data.success){
+			if (data.success) {
 				// const fileUrl = `http://localhost:3001${data.download_path}`;
 				// const fileBlob = await fetch(fileUrl);
 				// const blob = await fileBlob.blob();
 
 				// const blobUrl = window.URL.createObjectURL(blob);
-				const link = document.createElement('a');
+				const link = document.createElement("a");
 				link.href = `http://localhost:3001${data.download_path}`;
 				link.download = `${cardData.name || "card"}.${format}`;
-				link.setAttribute('target', '_blank');
+				link.setAttribute("target", "_blank");
 				document.body.appendChild(link);
 				link.click();
 				document.body.removeChild(link);
@@ -216,21 +216,28 @@ function App() {
 				</div>
 			)}
 
-			<SimpleGrid cols={2} spacing="xs" verticalSpacing="xs">
-				<div>
+			<SimpleGrid
+				cols={2}
+				spacing="xs"
+				verticalSpacing="xs"
+				className="container"
+			>
+				<div className="form-section">
 					<Title order={2} p="md" ta="center" className="titles">
 						Create a Magic: The Gathering Card
 					</Title>
 
-					<Container style={{ maxWidth: 600 }}>
+					<Container>
 						<Group mb="md" grow>
 							<TextInput
 								label="Card Name"
+								placeholder="Enter card name"
 								value={cardData.name}
 								onChange={(e) => handleChange(e.target.value, "name")}
 							/>
 							<TextInput
 								label="Mana Cost"
+								placeholder="e.g., (3)(U)"
 								value={cardData.mana_cost}
 								onChange={(e) => handleChange(e.target.value, "mana_cost")}
 							/>
@@ -241,16 +248,19 @@ function App() {
 								label="Type"
 								value={cardData.type}
 								onChange={(e) => handleChange(e.target.value, "type")}
+								placeholder="e.g., Creature"
 							/>
 							<TextInput
 								label="Subtype"
 								value={cardData.subtype}
 								onChange={(e) => handleChange(e.target.value, "subtype")}
+								placeholder="e.g., Human Wizard"
 							/>
 							<TextInput
 								label="Rarity"
 								value={cardData.rarity}
 								onChange={(e) => handleChange(e.target.value, "rarity")}
+								placeholder="e.g., Rare"
 							/>
 						</Group>
 						<Textarea
@@ -264,7 +274,7 @@ function App() {
 
 						<Textarea
 							label="Flavor Text"
-							placeholder="Optional"
+							placeholder="Optional flavor text"
 							value={cardData.flavor}
 							onChange={(e) => handleChange(e.target.value, "flavor")}
 							minRows={2}
@@ -272,47 +282,72 @@ function App() {
 						/>
 						<TextInput
 							label="Stats"
-							placeholder="e.g., (3/2)"
+							placeholder="e.g., 3/2"
 							value={cardData.stats}
 							onChange={(e) => handleChange(e.target.value, "stats")}
 							mb="md"
 						/>
 
-						<Divider label="Card Art" labelPosition="center" size="sm" />
-						<Group>
-							<Stack>
-								<FileButton
-									label="Upload Card Art"
-									placeholder="Choose an image file"
-									accept="image/*"
-									onChange={handleFileChange}
-									mb="md"
-									disabled={!!imageUrl}
-								>
-									{(props) => <Button {...props}>Upload image</Button>}
-								</FileButton>
+						<Paper
+							p="lg"
+							radius="md"
+							style={{
+								borderStyle: "dashed",
+								borderColor: "#d4b896",
+								background: "#fafaf8",
+								textAlign: "center",
+							}}
+							withBorder
+						>
+							<Group gap="md" wrap="nowrap" justify="center">
+								<Stack style={{ padding: "0.07rem" }}>
+									<FileButton
+										accept="image/*"
+										onChange={handleFileChange}
+										disabled={!!imageUrl}
+									>
+										{(props) => (
+											<Button
+												{...props}
+												style={{
+													background:
+														"linear-gradient(135deg, #d4762e 0%, #b85e1f 100%",
+													border: "none",
+												}}
+											>
+												Upload Image
+											</Button>
+										)}
+									</FileButton>
 
-								{artFile && (
-									<Text size="sm" ta="center" c="dimmed">
-										{artFile.name}
-									</Text>
-								)}
-							</Stack>
+									{artFile && (
+										<Text size="sm" ta="center" c="dimmed">
+											{artFile.name}
+										</Text>
+									)}
+								</Stack>
+								<Text size="sm" ta="center" c="dimmed">
+									OR
+								</Text>
+								<TextInput
+									placeholder="Provide image URL..."
+									value={imageUrl}
+									onChange={(e) => handleUrlChange(e.target.value)}
+									disabled={!!artFile}
+								/>
+							</Group>
+						</Paper>
 
-							<TextInput
-								label="Image URL"
-								placeholder="Provide image URL..."
-								value={imageUrl}
-								onChange={(e) => handleUrlChange(e.target.value)}
-								disabled={!!artFile}
-							/>
-						</Group>
 						<Button
 							loading={loading}
 							fullWidth
-							size="md"
+							size="lg"
 							radius="md"
 							onClick={handleSubmit}
+							style={{
+								background: "linear-gradient(135deg, #2c7a3e 0%, #1f5a2c 100%)",
+								marginTop: "1rem",
+							}}
 						>
 							Generate Final Card
 						</Button>
@@ -320,104 +355,113 @@ function App() {
 				</div>
 
 				<div style={styles.previewContainer}>
-					<Title order={2} mb="xl" ta="center" className="titles">
-						{generatedImage ? "Generated Card" : "Card Preview"}
-					</Title>
+					<Card
+						shadow="xl"
+						padding="0.5rem 2.5rem 2.5rem 2.5rem"
+						radius="lg"
+						style={{ background: "white" }}
+					>
+						<Title order={2} p="md" ta="center" className="titles">
+							{generatedImage ? "Generated Card" : "Card Preview"}
+						</Title>
 
-					{generatedImage ? (
-						<>
-							<img
-								src={generatedImage}
-								alt="Generated Card"
-								style={styles.image}
-							/>
+						{generatedImage ? (
+							<>
+								<img
+									src={generatedImage}
+									alt="Generated Card"
+									style={styles.image}
+								/>
 
-							<Group className="utility-section">
-								<ActionIcon
-									variant="filed"
-									size="xl"
-									aria-label="Reset"
-									onClick={resetForm}
-								>
-									<IconArrowBack
-										style={{ width: "70%", height: "70%" }}
-										stroke={1.5}
-									/>
-								</ActionIcon>
-								<ActionIcon
-									variant="filled"
-									size="xl"
-									aria-label="Download as PNG"
-									onClick={() => handleDownload("png")}
-								>
-									<IconFileTypePng
-										style={{ width: "70%", height: "70%" }}
-										stroke={1.5}
-									/>
-								</ActionIcon>
-								<ActionIcon
-									variant="filled"
-									size="xl"
-									aria-label="Download as JPG"
-									onClick={() => handleDownload("jpg")}
-								>
-									<IconFileTypeJpg
-										style={{ width: "70%", height: "70%" }}
-										stroke={1.5}
-									/>
-								</ActionIcon>
-							</Group>
-						</>
-					) : (
-						<div style={styles.card}>
-							<div style={styles.cardHeader}>
-								<div style={styles.cardName}>{cardData.name || "Untitled"}</div>
-								<div style={styles.manaCost}>{cardData.mana_cost || "0"}</div>
-							</div>
-
-							{/* Card Art */}
-							<div style={styles.cardArt}>
-								{artPreview ? (
-									<img
-										src={artPreview}
-										alt="Card art"
-										style={styles.artImage}
-									/>
-								) : (
-									<div style={styles.artPlaceholder}>
-										Upload image to preview
+								<Group className="utility-section">
+									<ActionIcon
+										variant="filed"
+										size="xl"
+										aria-label="Reset"
+										onClick={resetForm}
+									>
+										<IconArrowBack
+											style={{ width: "70%", height: "70%" }}
+											stroke={1.5}
+										/>
+									</ActionIcon>
+									<ActionIcon
+										variant="filled"
+										size="xl"
+										aria-label="Download as PNG"
+										onClick={() => handleDownload("png")}
+									>
+										<IconFileTypePng
+											style={{ width: "70%", height: "70%" }}
+											stroke={1.5}
+										/>
+									</ActionIcon>
+									<ActionIcon
+										variant="filled"
+										size="xl"
+										aria-label="Download as JPG"
+										onClick={() => handleDownload("jpg")}
+									>
+										<IconFileTypeJpg
+											style={{ width: "70%", height: "70%" }}
+											stroke={1.5}
+										/>
+									</ActionIcon>
+								</Group>
+							</>
+						) : (
+							<div style={styles.card}>
+								<div style={styles.cardHeader}>
+									<div style={styles.cardName}>
+										{cardData.name || "Untitled"}
 									</div>
-								)}
-							</div>
-
-							{/* Type Line */}
-							<div style={styles.typeLine}>
-								{cardData.type && cardData.subtype
-									? `${cardData.type} — ${cardData.subtype}`
-									: cardData.type || "Type"}
-							</div>
-
-							{/* Rules Text */}
-							<div style={styles.rulesBox}>
-								<div style={styles.rulesText}>
-									{cardData.rules || "Rules text will appear here"}
+									<div style={styles.manaCost}>{cardData.mana_cost || "0"}</div>
 								</div>
-								{cardData.flavor && (
-									<div style={styles.flavorText}>
-										<em>{cardData.flavor}</em>
-									</div>
-								)}
-							</div>
 
-							{/* Bottom Section */}
-							<div style={styles.cardBottom}>
-								<div style={styles.rarity}>{cardData.rarity || "Rarity"}</div>
-								{cardData.stats && (
-									<div style={styles.stats}>{cardData.stats}</div>
-								)}
+								{/* Card Art */}
+								<div style={styles.cardArt}>
+									{artPreview ? (
+										<img
+											src={artPreview}
+											alt="Card art"
+											style={styles.artImage}
+										/>
+									) : (
+										<div style={styles.artPlaceholder}>
+											Upload image to preview
+										</div>
+									)}
+								</div>
+
+								{/* Type Line */}
+								<div style={styles.typeLine}>
+									{cardData.type && cardData.subtype
+										? `${cardData.type} — ${cardData.subtype}`
+										: cardData.type || "Type"}
+								</div>
+
+								{/* Rules Text */}
+								<div style={styles.rulesBox}>
+									<div style={styles.rulesText}>
+										{cardData.rules || "Rules text will appear here"}
+									</div>
+									{cardData.flavor && (
+										<div style={styles.flavorText}>
+											<em>{cardData.flavor}</em>
+										</div>
+									)}
+								</div>
+
+								{/* Bottom Section */}
+								<div style={styles.cardBottom}>
+									<div style={styles.rarity}>{cardData.rarity || "Rarity"}</div>
+									{cardData.stats && (
+										<div style={styles.stats}>{cardData.stats}</div>
+									)}
+								</div>
 							</div>
-						</div>
-					)}
+						)}
+					</Card>
 				</div>
 			</SimpleGrid>
 		</>
@@ -426,7 +470,6 @@ function App() {
 
 const styles = {
 	previewContainer: {
-		padding: "1rem",
 		paddingLeft: "0",
 		display: "flex",
 		flexDirection: "column",
@@ -437,8 +480,8 @@ const styles = {
 		backgroundColor: "#1a1a1a",
 		borderRadius: "12px",
 		overflow: "hidden",
-		boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-		border: "8px solid #4a171e",
+		boxShadow: "0 0.5rem 2rem rgba(0,0,0,0.1)",
+		border: "8px solid #8b7355",
 		fontFamily: "'Beleren', serif",
 	},
 	cardHeader: {
@@ -446,7 +489,7 @@ const styles = {
 		justifyContent: "space-between",
 		alignItems: "center",
 		padding: "12px 15px",
-		background: "#ffd6b6",
+		background: "linear-gradient(to bottom, #d4c5a9 0%, #b8a68a 100%)",
 		borderBottom: "2px solid #8b7355",
 	},
 	cardName: {
